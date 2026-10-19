@@ -1,0 +1,1 @@
+{"name":"sonicdrop","version":"0.1.0","private":true,"type":"module","scripts":{"test":"node --test tests/protocol.test.mjs tests/audio.test.mjs","preview":"node serve.mjs"}}

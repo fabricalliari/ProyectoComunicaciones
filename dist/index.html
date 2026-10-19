@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f5f8fa"><meta name="description" content="Compartí imágenes pequeñas y texto mediante sonido. El contenido se procesa en tu dispositivo.">
+  <meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="SonicDrop">
+  <title>SonicDrop · Compartí por sonido</title>
+  <link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="manifest" href="manifest.webmanifest"><link rel="stylesheet" href="styles.css">
+  <script src="vendor/ggwave.js" defer></script><script type="module" src="app.js"></script>
+</head>
+<body>
+  <svg class="sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+    <symbol id="i-wave" viewBox="0 0 24 24"><path d="M3 10v4m4-8v12m5-15v18m5-15v12m4-8v4"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="m4 5 17-2-2 17-6-7-9-8Zm9 8 8-10"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2m-7 9v3m-4 0h8"/></symbol>
+    <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="m3 16 5-5 5 5 3-3 5 5"/><circle cx="16" cy="8" r="1.5"/></symbol>
+    <symbol id="i-text" viewBox="0 0 24 24"><path d="M4 5h16M12 5v15m-4 0h8"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4 10-10"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/></symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="m10 7 3-3a5 5 0 0 1 7 7l-3 3M14 17l-3 3a5 5 0 0 1-7-7l3-3m1 6 8-8"/></symbol>
+  </defs></svg>
+  <div class="shell">
+    <header class="header">
+      <a class="brand" href="./" aria-label="SonicDrop, inicio"><span class="brand-mark"><svg><use href="#i-wave"/></svg></span><span>Sonic<span class="brand-light">Drop</span><small>COMPARTÍ POR SONIDO</small></span></a>
+      <div class="header-right"><span class="badge"><span class="status-dot"></span> Prototipo</span><button class="help-button" id="helpButton" aria-label="Cómo funciona">?</button></div>
+    </header>
+    <main>
+      <section class="hero">
+        <div class="eyebrow"><span class="pill">DE PARLANTE A MICRÓFONO</span><span class="device-label">Pensado para Safari en iPhone, iPad y Mac</span></div>
+        <h1>Tu imagen.<br class="mobile-break"> Un sonido.<br><span>Otro dispositivo.</span></h1>
+        <p>Convertí una imagen pequeña o un mensaje en sonido.<br class="desktop-break"> Acercá los dispositivos y dejá que el otro lo escuche.</p>
+        <div class="hero-waves" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+      </section>
+      <nav class="mode-switch" aria-label="Modo de uso"><button id="sendTab" class="active" aria-pressed="true"><svg><use href="#i-send"/></svg>Enviar</button><button id="receiveTab" aria-pressed="false"><svg><use href="#i-mic"/></svg>Recibir</button></nav>
+      <section id="sendPanel" class="workspace" aria-label="Enviar contenido">
+        <article class="card input-card">
+          <div class="section-top"><span class="step">01</span><div><h2>Elegí qué compartir</h2><p>Todo se prepara en este dispositivo.</p></div></div>
+          <div class="kind-switch"><button id="imageKind" class="active" aria-pressed="true"><svg><use href="#i-image"/></svg>Imagen</button><button id="textKind" aria-pressed="false"><svg><use href="#i-text"/></svg>Texto</button></div>
+          <div id="imageInput">
+            <label class="drop-zone" id="dropZone" for="imageFile"><span class="upload-icon"><svg><use href="#i-image"/></svg></span><strong id="imageName">Elegí una imagen</strong><span>Desde Fotos o desde tus archivos</span><span class="small-button">Seleccionar imagen <span>↗</span></span></label>
+            <input class="visually-hidden" id="imageFile" type="file" accept="image/*">
+            <button class="link-button" id="exampleButton">Usar la imagen de ejemplo</button>
+            <div class="quality-label"><label for="quality">Tamaño de la miniatura</label><span>8 colores</span></div>
+            <select id="quality"><option value="24">Rápida · hasta 24 × 24 píxeles</option><option value="32" selected>Equilibrada · hasta 32 × 32 píxeles</option><option value="48">Más detalle · hasta 48 × 48 píxeles</option></select>
+            <p class="field-note">Se transmite una miniatura. El tamaño y los colores se reducen para que viaje en menos tiempo.</p>
+          </div>
+          <div id="textInput" hidden><label for="message">Tu mensaje</label><textarea id="message" rows="7" placeholder="Por ejemplo: nos encontramos en el puesto norte."></textarea><div class="text-counter"><span>Textos, coordenadas o enlaces cortos</span><span id="textCount">0 / 400 bytes</span></div></div>
+        </article>
+        <article class="card preview-card">
+          <div class="section-top"><span class="step">02</span><div><h2>Escuchá el envío</h2><p>El receptor recuperará esta versión.</p></div></div>
+          <div class="preview-stage" id="previewStage"><canvas id="sendImage" width="32" height="32" aria-label="Miniatura que se transmitirá"></canvas><p id="sendText" hidden></p><span class="preview-corner">VISTA PREVIA</span></div>
+          <div class="transfer-stats"><div><span>CONTENIDO</span><strong id="contentSize">Preparando…</strong></div><div><span>TIEMPO DE SONIDO</span><strong id="audioDuration">—</strong></div><div><span>BLOQUES</span><strong id="blockCount">—</strong></div></div>
+          <button class="primary" id="transmitButton" disabled><svg><use href="#i-wave"/></svg><span>Preparando el sonido…</span></button>
+          <div class="send-actions"><button class="secondary" id="cancelSend" hidden><svg><use href="#i-stop"/></svg>Detener</button><button class="link-button" id="downloadAudio" disabled><svg><use href="#i-down"/></svg>Guardar sonido WAV</button></div>
+          <p class="inline-hint">Primero activá <strong>Recibir</strong> en el otro dispositivo.</p>
+        </article>
+      </section>
+      <section id="receivePanel" class="workspace" aria-label="Recibir contenido" hidden>
+        <article class="card input-card">
+          <div class="section-top"><span class="step">01</span><div><h2>Escuchá la transferencia</h2><p>El micrófono será el receptor.</p></div></div>
+          <div class="listen-illustration" aria-hidden="true"><span class="listen-ring ring-one"></span><span class="listen-ring ring-two"></span><span class="mic-circle"><svg><use href="#i-mic"/></svg></span></div>
+          <p class="listen-copy">Acercá los dispositivos, mantené ambas pantallas encendidas y evitá hablar durante el envío.</p>
+          <button class="primary" id="listenButton"><svg><use href="#i-mic"/></svg><span>Activar micrófono</span></button>
+          <p class="field-note centered" id="micStatus">El navegador te pedirá permiso. El audio se procesa acá.</p>
+          <details class="audio-file-test"><summary>También podés probar con un audio guardado</summary><p>Elegí un WAV generado por SonicDrop. Se analiza su sonido para reconstruir el contenido.</p><label class="secondary file-label" for="audioFile"><svg><use href="#i-down"/></svg>Elegir audio WAV</label><input class="visually-hidden" id="audioFile" type="file" accept="audio/wav,audio/x-wav,.wav"></details>
+        </article>
+        <article class="card preview-card received-card">
+          <div class="section-top"><span class="step">02</span><div><h2>Lo que llegó</h2><p id="receivedSubtitle">Esperando una imagen o un mensaje.</p></div></div>
+          <div class="preview-stage waiting" id="receivedStage"><div id="receivedPlaceholder"><svg><use href="#i-image"/></svg><strong>Acá aparecerá el contenido</strong><span>Cuando lleguen todos los bloques</span></div><canvas id="receivedImage" width="32" height="32" hidden aria-label="Imagen reconstruida a partir del sonido"></canvas><p id="receivedText" hidden></p></div>
+          <div class="receiver-count"><span id="receivedCount">0 bloques recibidos</span><span id="receivedCheck">Sin transferencia</span></div>
+          <div class="progress-track"><span id="receiveProgress"></span></div>
+          <div class="receive-actions"><button class="primary" id="saveImage" hidden><svg><use href="#i-down"/></svg>Guardar imagen PNG</button><button class="primary" id="copyText" hidden>Copiar mensaje</button><button class="link-button" id="resetReceiver">Limpiar recepción</button></div>
+          <p class="inline-hint">Si falta un bloque, volvé a emitir el mismo sonido. Se conservan los que ya llegaron.</p>
+        </article>
+      </section>
+      <section class="signal-card" aria-label="Estado del enlace"><div class="signal-heading"><div><span class="status-dot" id="signalDot"></span><strong id="signalTitle">Listo para empezar</strong></div><span id="signalLabel">Sonido audible</span></div><canvas id="waveform" width="1080" height="90" aria-label="Forma de onda del audio"></canvas><div class="signal-bottom"><p id="notice" role="status" aria-live="polite">Cargá una imagen o probá con el ejemplo.</p><span id="sendProgressLabel"></span></div><div class="progress-track send-track" id="sendTrack" hidden><span id="sendProgress"></span></div></section>
+      <section class="quick-guide"><div><span>1</span><p><strong>Prepará ambos dispositivos</strong>Abrí SonicDrop y subí el volumen.</p></div><div><span>2</span><p><strong>Uno escucha, el otro envía</strong>Activá el micrófono antes del sonido.</p></div><div><span>3</span><p><strong>Comprobá el resultado</strong>La recepción verifica el contenido completo.</p></div></section>
+    </main>
+    <footer><span><svg><use href="#i-link"/></svg>El contenido viaja por sonido y se procesa localmente.</span><span id="offlineStatus">Preparando acceso sin conexión…</span></footer>
+  </div>
+  <dialog id="helpDialog"><button class="dialog-close" id="closeHelp" aria-label="Cerrar ayuda">×</button><span class="pill">GUÍA RÁPIDA</span><h2>Un dispositivo habla.<br>El otro escucha.</h2><ol><li>Abrí la misma web en ambos dispositivos.</li><li>En el receptor, elegí <strong>Recibir</strong> y activá el micrófono.</li><li>En el emisor, cargá una imagen, revisá la miniatura y presioná <strong>Transmitir por sonido</strong>.</li><li>Esperá a que el receptor confirme el contenido. Podés guardar la imagen reconstruida.</li></ol><p>Para empezar, probá con los dispositivos a unos 20–50 cm, sin auriculares y con un volumen de salida alto pero cómodo. La distancia útil depende de los dispositivos y el ambiente.</p><p>Si no llegan todos los bloques, emití el mismo sonido otra vez. Si cambiás la imagen, limpiá primero la recepción.</p><p>La primera carga requiere internet. La web prepara los recursos para abrirse sin conexión; confirmá que indique “Disponible sin conexión” y comprobalo en tus dispositivos. La app debe mantenerse abierta durante el intercambio.</p><a href="vendor/LICENSE-ggwave.txt" target="_blank" rel="noopener">Biblioteca de audio: ggwave · licencia MIT</a><button class="primary" id="helpDone">Entendido</button></dialog>
+</body>
+</html>

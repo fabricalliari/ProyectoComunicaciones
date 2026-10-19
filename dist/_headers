@@ -1,0 +1,3 @@
+/*
+  Permissions-Policy: microphone=(self)
+  X-Content-Type-Options: nosniff

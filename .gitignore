@@ -1,0 +1,12 @@
+vendor-source/
+ggwave.tgz
+ggwave-example.html
+debug-rates.mjs
+node_modules/
+screenshots/
+test-results/
+.local/
+.openai/
+dist/standalone.html
+package-deliverables.mjs
+tmp/
