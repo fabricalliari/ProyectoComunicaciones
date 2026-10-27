@@ -2,7 +2,7 @@ name: Publicar SonicDrop en GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches: [main, experimento/alta-frecuencia]
   workflow_dispatch:
 
 permissions:
@@ -23,11 +23,20 @@ jobs:
         with:
           node-version: '24'
       - name: Verificar el protocolo y el audio
-        run: node --test tests/protocol.test.mjs tests/audio.test.mjs
+        run: npm test
+      - name: Obtener la versión estable para la raíz del sitio
+        if: github.ref == 'refs/heads/experimento/alta-frecuencia'
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          path: stable-site
+      - name: Preparar el sitio con la prueba en una subcarpeta
+        if: github.ref == 'refs/heads/experimento/alta-frecuencia'
+        run: node scripts/build-preview.mjs
       - name: Subir la web estática
         uses: actions/upload-pages-artifact@v4
         with:
-          path: dist
+          path: ${{ github.ref == 'refs/heads/experimento/alta-frecuencia' && '.pages-site' || 'dist' }}
 
   deploy:
     needs: verify

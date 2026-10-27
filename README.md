@@ -1,5 +1,9 @@
 # ProyectoComunicaciones
 
+## Rama experimental: altas frecuencias
+
+Esta rama agrega una [prueba FSK de 18.500/19.500 Hz](docs/ALTA-FRECUENCIA.md) para mensajes cortos, con comparación audible, filtro pasabanda, Goertzel y CRC. Abrí `alta-frecuencia.html`. La compatibilidad acústica se medirá entre teléfonos; no se garantiza que los tonos sean inaudibles para todas las personas.
+
 ## SonicDrop: comunicación de datos por sonido
 
 Prototipo académico de una web que transforma texto y miniaturas en sonido y permite reconstruirlos en otro dispositivo mediante su micrófono. El motor ggwave y todos los recursos están incluidos localmente. El contenido se procesa en el navegador y no se envía a un servidor.

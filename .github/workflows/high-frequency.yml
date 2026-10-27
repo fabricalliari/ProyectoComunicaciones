@@ -1,0 +1,25 @@
+name: Verificar experimento de alta frecuencia
+
+on:
+  push:
+    branches: [experimento/alta-frecuencia]
+  pull_request:
+    paths: ['dist/high-frequency*', 'dist/alta-frecuencia.html', 'tests/high-frequency.test.mjs']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - run: npm test
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sonicdrop-alta-frecuencia
+          path: dist

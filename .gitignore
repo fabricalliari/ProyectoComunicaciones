@@ -10,3 +10,5 @@ test-results/
 dist/standalone.html
 package-deliverables.mjs
 tmp/
+/.pages-site/
+/stable-site/

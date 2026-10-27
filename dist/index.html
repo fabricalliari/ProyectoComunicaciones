@@ -5,7 +5,7 @@
   <meta name="theme-color" content="#f5f8fa"><meta name="description" content="Compartí imágenes pequeñas y texto mediante sonido. El contenido se procesa en tu dispositivo.">
   <meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="SonicDrop">
   <title>SonicDrop · Compartí por sonido</title>
-  <link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="manifest" href="manifest.webmanifest"><link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="manifest" href="manifest.webmanifest"><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="high-frequency.css">
   <script src="vendor/ggwave.js" defer></script><script type="module" src="app.js"></script>
 </head>
 <body>
@@ -32,6 +32,7 @@
         <p>Convertí una imagen pequeña o un mensaje en sonido.<br class="desktop-break"> Acercá los dispositivos y dejá que el otro lo escuche.</p>
         <div class="hero-waves" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
       </section>
+      <a class="lab-banner" href="alta-frecuencia.html"><strong>Prueba experimental · 18.500 y 19.500 Hz</strong>Enviar texto con tonos casi inaudibles y comparar con la banda audible →</a>
       <nav class="mode-switch" aria-label="Modo de uso"><button id="sendTab" class="active" aria-pressed="true"><svg><use href="#i-send"/></svg>Enviar</button><button id="receiveTab" aria-pressed="false"><svg><use href="#i-mic"/></svg>Recibir</button></nav>
       <section id="sendPanel" class="workspace" aria-label="Enviar contenido">
         <article class="card input-card">
