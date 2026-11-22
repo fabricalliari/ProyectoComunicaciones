@@ -2,7 +2,7 @@
 
 Rama: `experimento/alta-frecuencia`.
 
-Abrí `alta-frecuencia.html` desde el servidor del proyecto. El inicio del prototipo también tiene un acceso a esta prueba.
+Abrí el inicio del servidor (`index.html`) para usar la central de droides: **C-3PO** representa el canal audible de 1.200/2.200 Hz y **R2-D2** el canal casi inaudible de 18.500/19.500 Hz. Ambos canales comparten el módem FSK experimental. `alta-frecuencia.html` conserva el acceso directo a R2-D2 y `clasico.html` permite entrar al protocolo original de imágenes y texto.
 
 ## Probar en la computadora
 
@@ -11,7 +11,7 @@ npm test
 npm run preview
 ```
 
-Abrí http://127.0.0.1:5178/alta-frecuencia.html. La prueba digital genera audio PCM, aplica el filtro de Web Audio y recupera el texto con Goertzel y CRC. El WAV descargado también puede importarse. Esto verifica el recorrido digital; no acredita el canal acústico entre dos teléfonos.
+Abrí http://127.0.0.1:5178/. La prueba digital genera audio PCM, aplica el filtro de Web Audio y recupera el texto con Goertzel y CRC. El WAV descargado también puede importarse. Esto verifica el recorrido digital; no acredita el canal acústico entre dos teléfonos.
 
 ## Probar con dos iPhone
 

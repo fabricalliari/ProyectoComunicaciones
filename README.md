@@ -2,7 +2,7 @@
 
 ## Rama experimental: altas frecuencias
 
-Esta rama agrega una [prueba FSK de 18.500/19.500 Hz](docs/ALTA-FRECUENCIA.md) para mensajes cortos, con comparación audible, filtro pasabanda, Goertzel y CRC. Abrí `alta-frecuencia.html`. La compatibilidad acústica se medirá entre teléfonos; no se garantiza que los tonos sean inaudibles para todas las personas.
+Esta rama agrega una [central de comunicación inspirada en droides](docs/ALTA-FRECUENCIA.md) para mensajes cortos: C-3PO (1.200/2.200 Hz) y R2-D2 (18.500/19.500 Hz), con FSK binaria, filtro pasabanda, Goertzel y CRC. El inicio permite elegir ambos canales; el acceso de imágenes y textos del protocolo original se conserva en `clasico.html`. La compatibilidad acústica se medirá entre teléfonos; no se garantiza que los tonos altos sean inaudibles para todas las personas.
 
 ## SonicDrop: comunicación de datos por sonido
 

@@ -2,19 +2,24 @@ import { BANDS, MAX_BYTES, HighFrequencyDecoder, connectBandpass, packetBytes, s
 import { newAudioContext, wavBytes } from './audio.js';
 
 const element = id => document.getElementById(id);
+const bandInputs = [...document.querySelectorAll('input[name="band"]')];
 let playback = null, capture = null, busy = false, operation = 0;
-const currentBand = () => element('band').value;
+const currentBand = () => bandInputs.find(input => input.checked).value;
+const formatFrequency = frequency => `${frequency.toLocaleString('es-AR')} Hz`;
 const status = (text, error = false) => {
   element('labStatus').textContent = text;
-  element('labStatusTitle').textContent = error ? 'Revisá la prueba' : capture ? 'Escuchando' : playback ? 'Emitiendo sonido' : 'Listo para probar';
+  element('labStatusTitle').textContent = error ? 'Revisá la prueba' : capture ? 'Escuchando' : playback ? 'Emitiendo sonido' : busy ? 'Analizando audio' : 'Listo para probar';
   document.querySelector('.signal-card').classList.toggle('error', error);
+  document.body.dataset.activity = error ? 'error' : capture ? 'listen' : playback ? 'transmit' : busy ? 'digital' : 'idle';
 };
 function controls() {
   const active = !!playback || !!capture || busy;
-  for (const id of ['band', 'labMessage', 'toneZero', 'toneOne', 'labDigital', 'labAudioFile', 'labDownload']) element(id).disabled = active;
+  for (const input of bandInputs) input.disabled = active;
+  for (const id of ['labMessage', 'toneZero', 'toneOne', 'labDigital', 'labAudioFile', 'labDownload']) element(id).disabled = active;
   let valid = false;
   try { packetBytes(element('labMessage').value); valid = true; } catch { }
   element('labSend').disabled = active || !valid;
+  element('labSendText').textContent = playback ? 'Emitiendo sonido…' : 'Transmitir mensaje';
   element('labDownload').disabled = active || !valid;
   element('labDigital').disabled = active || !valid;
   element('labListen').disabled = busy || !!playback;
@@ -22,14 +27,26 @@ function controls() {
   element('labStopSend').hidden = !playback;
 }
 function describe() {
-  const config = BANDS[currentBand()], count = new TextEncoder().encode(element('labMessage').value).length;
+  const band = currentBand(), config = BANDS[band], count = new TextEncoder().encode(element('labMessage').value).length;
+  document.body.dataset.band = band;
+  element('activeChannel').textContent = `CANAL ${band === 'high' ? 'R2-D2' : 'C-3PO'} ACTIVO`;
   element('byteCount').textContent = `${count} / ${MAX_BYTES} bytes`;
-  element('frequencyZero').textContent = `${config.tones[0].toLocaleString('es-AR')} Hz`;
-  element('frequencyOne').textContent = `${config.tones[1].toLocaleString('es-AR')} Hz`;
-  element('bandHint').textContent = `FSK binaria · 50 bits/s · filtro ${config.filter[0] / 1000}–${config.filter[1] / 1000} kHz.` + (currentBand() === 'high' ? ' Algunas personas pueden escuchar estos tonos.' : ' Banda audible para comparar.');
+  element('byteCount').classList.toggle('over-limit', count > MAX_BYTES);
+  element('frequencyZero').textContent = formatFrequency(config.tones[0]);
+  element('frequencyOne').textContent = formatFrequency(config.tones[1]);
+  const range = config.filter.map(value => (value / 1000).toLocaleString('es-AR')).join('–');
+  element('bandHint').textContent = `FSK binaria · 50 bits/s · filtro ${range} kHz.` + (band === 'high' ? ' Algunas personas pueden escuchar estos tonos.' : ' Banda audible para comenzar.');
   try { const audio = synthesizeHigh(element('labMessage').value, { band: currentBand() }); element('duration').textContent = `${count} bytes · ${audio.duration.toFixed(1)} s de audio · incluye sincronización y CRC`; }
   catch (error) { element('duration').textContent = error.message; }
   controls();
+}
+function changeBand() {
+  const band = currentBand();
+  describe();
+  element('labResult').textContent = 'Todavía no llegó un mensaje.';
+  element('captureInfo').textContent = 'El audio se procesa localmente. El micrófono necesita HTTPS o localhost.';
+  element('labRate').textContent = 'Muestreo objetivo: 48 kHz';
+  status(`Canal ${band === 'high' ? 'R2-D2' : 'C-3PO'} activo. Elegí la misma banda en el otro dispositivo.`);
 }
 function stopPlayback(completed = false) {
   if (!playback) return;
@@ -42,7 +59,8 @@ function stopPlayback(completed = false) {
 }
 async function play(tone = null) {
   if (playback || capture || busy) return;
-  const context = newAudioContext();
+  let context;
+  try { context = newAudioContext(); } catch (error) { status(error.message, true); return; }
   const resumed = context.resume();
   const source = context.createBufferSource(), active = playback = { context, source };
   controls(); status(tone === null ? 'Transmitiendo el mensaje. Mantené esta pantalla abierta.' : `Emitiendo el tono ${tone} durante 0,8 s.`);
@@ -89,13 +107,16 @@ function closeCapture() {
   previous.stream?.getTracks().forEach(track => track.stop()); previous.filter?.disconnect(); previous.source?.disconnect();
   previous.decoder?.dispose(); void previous.context.close().catch(() => {});
   if (previous.wakeLock) void previous.wakeLock.release().catch(() => {});
+  element('captureInfo').textContent = 'Micrófono detenido. Activá de nuevo para recibir otro mensaje.';
   controls(); status('Micrófono detenido.');
 }
 async function listen() {
   if (capture) { closeCapture(); return; }
   if (busy || playback) return;
   if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) { status('El micrófono necesita HTTPS o localhost. Abrí la versión de prueba en un origen seguro.', true); return; }
-  const context = newAudioContext(), resumed = context.resume();
+  let context;
+  try { context = newAudioContext(); } catch (error) { status(error.message, true); return; }
+  const resumed = context.resume();
   const active = capture = { context }; controls(); status('Autorizá el micrófono.');
   // Handle rejection even while the permission dialog is still open.
   void resumed.catch(() => {});
@@ -137,6 +158,7 @@ async function listen() {
 async function digitalTest(file = null) {
   if (capture || playback || busy) return;
   busy = true; const current = ++operation; controls(); status(file ? 'Analizando el WAV localmente…' : 'Generando audio y comprobando la decodificación…');
+  element('labResult').textContent = 'Analizando el sonido…';
   let context, decoder;
   try {
     let samples, rate;
@@ -165,8 +187,12 @@ async function digitalTest(file = null) {
     }
     if (!decoder.metrics.accepted) throw Error('No se encontró un mensaje válido para esta banda.');
     status(file ? 'WAV decodificado: mensaje recuperado y CRC correcto.' : 'Prueba digital correcta: PCM → pasabanda → Goertzel → texto + CRC. La prueba entre teléfonos verifica el canal físico.');
-  } catch (error) { status(error.message, true); }
-  finally { decoder?.dispose(); if (context) void context.close().catch(() => {}); busy = false; element('labAudioFile').value = ''; controls(); }
+  } catch (error) { element('labResult').textContent = 'No se recuperó un mensaje válido.'; status(error.message, true); }
+  finally {
+    decoder?.dispose(); if (context) void context.close().catch(() => {}); busy = false; element('labAudioFile').value = '';
+    if (document.body.dataset.activity === 'digital') { document.body.dataset.activity = 'idle'; element('labStatusTitle').textContent = 'Prueba finalizada'; }
+    controls();
+  }
 }
 function updateMeters() {
   const metrics = capture?.decoder?.metrics;
@@ -177,7 +203,8 @@ function updateMeters() {
   element('syncStatus').textContent = metrics ? `${metrics.locked ? 'Preámbulo detectado · recibiendo' : 'Buscando preámbulo'} · ${metrics.accepted} válidos · ${metrics.rejected} rechazados` : 'Esperando el preámbulo';
   requestAnimationFrame(updateMeters);
 }
-element('band').onchange = describe; element('labMessage').oninput = describe;
+for (const input of bandInputs) input.onchange = changeBand;
+element('labMessage').oninput = describe;
 element('labSend').onclick = () => void play(); element('labStopSend').onclick = () => stopPlayback();
 element('toneZero').onclick = () => void play(0); element('toneOne').onclick = () => void play(1);
 element('labListen').onclick = () => void listen(); element('labDigital').onclick = () => void digitalTest();
@@ -189,5 +216,10 @@ element('labDownload').onclick = () => {
 };
 document.addEventListener('visibilitychange', () => { if (document.hidden) { closeCapture(); stopPlayback(); } });
 window.addEventListener('pagehide', () => { closeCapture(); stopPlayback(); });
+if (location.hash === '#alta') element('bandHigh').checked = true;
 describe(); updateMeters();
-if ('serviceWorker' in navigator && window.isSecureContext) void navigator.serviceWorker.register('./sw.js').catch(() => {});
+if ('serviceWorker' in navigator && window.isSecureContext) {
+  navigator.serviceWorker.register('./sw.js').then(() => navigator.serviceWorker.ready).then(() => {
+    element('offlineStatus').textContent = 'Recursos guardados · disponible sin conexión';
+  }).catch(() => { element('offlineStatus').textContent = 'Acceso offline no preparado'; });
+} else { element('offlineStatus').textContent = 'Primera carga con conexión'; }
